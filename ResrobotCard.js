@@ -22,6 +22,12 @@ class ResrobotCard extends LitElement {
     this.open = !this.open
   }
 
+  getColor(minutesLeft){
+    const value = minutesLeft > 15 ? 0 : 1 - minutesLeft / 15
+    var hue=((1-value)*120).toString(10);
+    return ["hsl(",hue,",60%,50%)"].join("");
+  }
+
   _render({ hass, config, open }) {
     const state = hass.states[config.entity];
     const leavesIn = state ? state.state : 'unavailable';
@@ -29,7 +35,7 @@ class ResrobotCard extends LitElement {
     return html`
       <style>${style}</style>
       <ha-card id="departure-card">
-        <div class="header">${leavesIn === 'Nu' ? html`Bussen går <strong>nu</strong>` : html`Bussen går om <strong>${leavesIn}</strong> minuter`}</div>
+        <div class="header">${leavesIn === 'Nu' ? html`Bussen går <strong>nu</strong>` : html`Bussen går om <strong style="color: ${this.getColor(leavesIn)}">${leavesIn}</strong> minuter`}</div>
         <div class="next-text">Nästa buss går om <strong>${state.attributes['next_diff']}</strong> minuter</div>
         <ha-icon id="chevron-icon" icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" on-click="${this._toggle}"></ha-icon>
         <div class="departure-table">
@@ -87,7 +93,17 @@ const style = `
   .departure {
     display: flex;
     flex-direction: row;
-    margin-bottom: 8px;
+    padding-bottom: 8px;
+    position: relative;
+  }
+  .departure::after {
+    content: '';
+    background: #dedede;
+    width: 2px;
+    position: absolute;
+    left: 16px;;
+    height: 100%;
+    z-index: 1;
   }
   .departure-content {
     display: flex;
@@ -110,7 +126,7 @@ const style = `
   }
   .info {
     font-size: 12px;
-    color: #555555;
+    color: #ababab;
   }
   ha-icon#chevron-icon {
     position: absolute;
@@ -126,5 +142,7 @@ const style = `
     padding: 6px;
     border-radius: 50%;
     box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    position: relative;
+    z-index: 2;
   }
 `
